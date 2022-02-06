@@ -38,11 +38,14 @@ for review in pull_request.get_review_comments():
     else:
         review_comments_dict[review.path][diff] = [review_comment]
 
+issue_index = 1
+
 with open(f"{config.REPO.split('/')[-1]}-pr-{config.PR}.md", "w") as report:
     for fname in review_comments_dict:
         report.write(f"# {fname}\n\n")
         for diff in review_comments_dict[fname]:
-            report.write(f"## L{diff.positions[0]}-{diff.positions[1]}\n\n")
+            report.write(f"## {issue_index}: L{diff.positions[0]}-{diff.positions[1]}\n\n")
+            issue_index += 1
             report.write(f"```diff\n{diff.diff_string}\n```\n\n")
             for review_comment in review_comments_dict[fname][diff]:
                 report.write(f"[{review_comment.author}]({review_comment.url}): {review_comment.body}\n\n")
@@ -51,4 +54,6 @@ with open(f"{config.REPO.split('/')[-1]}-pr-{config.PR}.md", "w") as report:
     if general_comments.totalCount != 0:
         report.write("# General comments\n\n")
         for comment in general_comments:
+            report.write(f"## {issue_index}\n")
+            issue_index += 1
             report.write(f"[{comment.user.login}]({comment.html_url}): {clean_endings(comment.body)}\n\n")
